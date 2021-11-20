@@ -118,9 +118,15 @@ fn print_color_res_(message: &str, color: Color) -> io::Result<()> {
 /// Used when the program should exit from a condition that may arise normally from program use,
 /// like incorrect info in config files, problems with dependencies, or internet connection problems.
 /// We use `expect`, `panic!` etc for problems that indicate a bug in this program.
+#[cfg(not(test))]
 pub fn abort(message: &str) {
     print_color(message, Color::Red);
     process::exit(1)
+}
+
+#[cfg(test)]
+pub fn abort(message: &str) {
+    panic!("{}", message)
 }
 
 /// Find which virtual environments exist.
