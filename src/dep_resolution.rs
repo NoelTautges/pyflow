@@ -393,7 +393,18 @@ pub(super) mod res {
                 all_compat
                     .iter()
                     .max()
-                    .unwrap_or_else(|| panic!("Can't find a valid version for {}", name))
+                    .unwrap_or_else(|| {
+                        util::abort(&format!(
+                            "Can't find a valid version for {}!\n\
+                             Requirement: {}",
+                            name,
+                            match req {
+                                Some(ref r) => format!("{}", r),
+                                None => "N/A".to_string(),
+                            }
+                        ));
+                        unreachable!()
+                    })
                     .clone(),
                 all_compat,
             ))
@@ -913,7 +924,8 @@ pub mod tests {
 
     // todo: Make dep-resolver tests, including both simple, conflicting/resolvable, and confliction/unresolvable.
 
-    #[rstest(package,
+    #[rstest(
+        package,
         case::botocore("botocore"),
         case::urllib3("urllib3"),
         case::boto3("boto3"),
@@ -1013,18 +1025,25 @@ pub mod tests {
         case::cloudpickle("cloudpickle"),
         case::pexpect("pexpect"),
         case::google_auth_httplib2("google-auth-httplib2"),
-        case::ptyprocess("ptyprocess"),
+        case::ptyprocess("ptyprocess")
     )]
     fn popular_packages(package: &str) {
         let data = get_warehouse_data(package).unwrap();
-        get_version_info(package, Some(Req::new_with_extras(
-            package.to_owned(),
-            vec![Constraint::from_str(format!("=={}", data.info.version).as_str()).unwrap()],
-            Extras {
-                extra: None,
-                sys_platform: None,
-                python_version: Some(Constraint { type_: ReqType::Gte, version: Version::new_opt(Some(3), None, None) }),
-            },
-        ))).ok();
+        get_version_info(
+            package,
+            Some(Req::new_with_extras(
+                package.to_owned(),
+                vec![Constraint::from_str(format!("=={}", data.info.version).as_str()).unwrap()],
+                Extras {
+                    extra: None,
+                    sys_platform: None,
+                    python_version: Some(Constraint {
+                        type_: ReqType::Gte,
+                        version: Version::new_opt(Some(3), None, None),
+                    }),
+                },
+            )),
+        )
+        .ok();
     }
 }
