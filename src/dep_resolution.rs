@@ -302,7 +302,7 @@ pub(super) mod res {
     }
 
     /// Fetch data about a package from the [Pypi Warehouse](https://warehouse.pypa.io/api-reference/json/).
-    fn get_warehouse_data(name: &str) -> Result<WarehouseData, reqwest::Error> {
+    pub(super) fn get_warehouse_data(name: &str) -> Result<WarehouseData, reqwest::Error> {
         let url = format!("https://pypi.org/pypi/{}/json", name);
         let resp = reqwest::get(&url)?.json()?;
         Ok(resp)
@@ -839,6 +839,10 @@ pub(super) mod res {
 }
 #[cfg(test)]
 pub mod tests {
+    use crate::dep_types::Extras;
+
+    use rstest::rstest;
+
     use super::res::*;
     use super::*;
 
@@ -908,4 +912,119 @@ pub mod tests {
     //    }
 
     // todo: Make dep-resolver tests, including both simple, conflicting/resolvable, and confliction/unresolvable.
+
+    #[rstest(package,
+        case::botocore("botocore"),
+        case::urllib3("urllib3"),
+        case::boto3("boto3"),
+        case::s3transfer("s3transfer"),
+        case::six("six"),
+        case::python_dateutil("python-dateutil"),
+        case::jmespath("jmespath"),
+        case::setuptools("setuptools"),
+        case::awscli("awscli"),
+        case::requests("requests"),
+        case::pyyaml("pyyaml"),
+        case::idna("idna"),
+        case::certifi("certifi"),
+        case::wheel("wheel"),
+        case::colorama("colorama"),
+        case::pyasn1("pyasn1"),
+        case::pip("pip"),
+        case::rsa("rsa"),
+        case::numpy("numpy"),
+        case::typing_extensions("typing-extensions"),
+        case::charset_normalizer("charset-normalizer"),
+        case::pandas("pandas"),
+        case::packaging("packaging"),
+        case::cffi("cffi"),
+        case::protobuf("protobuf"),
+        case::click("click"),
+        case::jinja2("jinja2"),
+        case::markupsafe("markupsafe"),
+        case::pyparsing("pyparsing"),
+        case::importlib_metadata("importlib-metadata"),
+        case::zipp("zipp"),
+        case::pytz("pytz"),
+        case::cryptography("cryptography"),
+        case::attrs("attrs"),
+        case::pycparser("pycparser"),
+        case::docutils("docutils"),
+        case::google_api_core("google-api-core"),
+        case::pyjwt("pyjwt"),
+        case::oauthlib("oauthlib"),
+        case::requests_oauthlib("requests-oauthlib"),
+        case::google_auth("google-auth"),
+        case::chardet("chardet"),
+        case::cachetools("cachetools"),
+        case::sqlalchemy("sqlalchemy"),
+        case::google_cloud_core("google-cloud-core"),
+        case::pyasn1_modules("pyasn1-modules"),
+        case::websocket_client("websocket-client"),
+        case::flask("flask"),
+        case::decorator("decorator"),
+        case::multidict("multidict"),
+        case::yarl("yarl"),
+        case::werkzeug("werkzeug"),
+        case::google_cloud_storage("google-cloud-storage"),
+        case::docker("docker"),
+        case::psutil("psutil"),
+        case::jsonschema("jsonschema"),
+        case::aiohttp("aiohttp"),
+        case::pyarrow("pyarrow"),
+        case::itsdangerous("itsdangerous"),
+        case::greenlet("greenlet"),
+        case::pyrsistent("pyrsistent"),
+        case::async_timeout("async-timeout"),
+        case::tabulate("tabulate"),
+        case::azure_core("azure-core"),
+        case::toml("toml"),
+        case::wrapt("wrapt"),
+        case::isodate("isodate"),
+        case::azure_storage_blob("azure-storage-blob"),
+        case::fsspec("fsspec"),
+        case::py("py"),
+        case::joblib("joblib"),
+        case::googleapis_common_protos("googleapis-common-protos"),
+        case::google_api_python_client("google-api-python-client"),
+        case::pygments("pygments"),
+        case::msrest("msrest"),
+        case::matplotlib("matplotlib"),
+        case::pillow("pillow"),
+        case::scipy("scipy"),
+        case::gitpython("gitpython"),
+        case::prometheus_client("prometheus-client"),
+        case::gunicorn("gunicorn"),
+        case::kiwisolver("kiwisolver"),
+        case::smmap("smmap"),
+        case::mypy_extensions("mypy-extensions"),
+        case::pytest("pytest"),
+        case::gitdb("gitdb"),
+        case::azure_common("azure-common"),
+        case::grpcio("grpcio"),
+        case::mako("mako"),
+        case::tenacity("tenacity"),
+        case::uritemplate("uritemplate"),
+        case::webencodings("webencodings"),
+        case::sqlparse("sqlparse"),
+        case::filelock("filelock"),
+        case::pluggy("pluggy"),
+        case::cycler("cycler"),
+        case::cloudpickle("cloudpickle"),
+        case::pexpect("pexpect"),
+        case::google_auth_httplib2("google-auth-httplib2"),
+        case::ptyprocess("ptyprocess"),
+    )]
+    fn popular_packages(package: &str) {
+        let data = get_warehouse_data(package).unwrap();
+        get_version_info(package, Some(Req::new_with_extras(
+            package.to_owned(),
+            vec![Constraint::from_str(format!("=={}", data.info.version).as_str()).unwrap()],
+            Extras {
+                extra: None,
+                sys_platform: None,
+                python_version: Some(Constraint { type_: ReqType::Gte, version: Version::new_opt(Some(3), None, None) }),
+            },
+        ))).ok();
+    }
 }
