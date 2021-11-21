@@ -496,7 +496,7 @@ pub(super) mod res {
                     } else {
                         util::abort(&format!(
                             "Can't get version info for the dependency `{}`. \
-                         Is it spelled correctly? Is the internet connection ok?",
+                             Is it spelled correctly? Is the internet connection ok?",
                             &req.name
                         ));
                         ("".to_string(), Version::new(0, 0, 0), vec![]) // match-compatibility placeholder
