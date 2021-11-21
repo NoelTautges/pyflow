@@ -499,7 +499,7 @@ pub(super) mod res {
                              Is it spelled correctly? Is the internet connection ok?",
                             &req.name
                         ));
-                        ("".to_string(), Version::new(0, 0, 0), vec![]) // match-compatibility placeholder
+                        unreachable!()
                     }
                 }
             };
