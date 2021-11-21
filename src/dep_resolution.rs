@@ -481,16 +481,29 @@ pub(super) mod res {
         py_vers: &Version,
     ) -> Result<Vec<ReqCache>, DependencyError> {
         // Narrow-down our list of versions to query.
-
         let mut query_data = HashMap::new();
         for req in reqs {
+            // If dependency isn't necessary for Python version, skip it
+            if let Some(py_constraints) = &req.python_version {
+                if !is_compat(&py_constraints, py_vers) {
+                    continue;
+                }
+            }
+
             // todo: cache version info; currently may get this multiple times.
             let (_, latest_version, all_versions) = match vers_cache.get(&req.name) {
                 Some(c) => c.clone(),
                 None => {
-                    if let Ok(data) =
-                        get_version_info(&req.name, Some(req.clone_or_default_py(py_vers)))
-                    {
+                    if let Ok(data) = get_version_info(
+                        &req.name,
+                        Some(Req {
+                            python_version: Some(vec![Constraint {
+                                type_: ReqType::Gte,
+                                version: py_vers.clone(),
+                            }]),
+                            ..req.clone()
+                        }),
+                    ) {
                         vers_cache.insert(req.name.clone(), data.clone());
                         data
                     } else {
@@ -1039,7 +1052,7 @@ pub mod tests {
                     sys_platform: None,
                     python_version: Some(Constraint {
                         type_: ReqType::Gte,
-                        version: Version::new_opt(Some(3), None, None),
+                        version: Version::new_opt(Some(3), Some(10), Some(0)),
                     }),
                 },
             )),
