@@ -889,9 +889,9 @@ impl Req {
             .unwrap_or_else(|| Version::new_star(None, None, None, true));
         let constraint = Constraint::new(ReqType::Exact, ver);
         let py_ver = Constraint::from_wh_py_vers(&release.python_version);
-        let requires = if let Some(x) = release.requires_python {
+        let requires = if let Some(x) = &release.requires_python {
             if x.as_str() > "" {
-                if let Ok(c) = Constraint::from_str_multiple(&x) {
+                if let Ok(c) = Constraint::from_str_multiple(x) {
                     Some(c)
                 } else {
                     None
@@ -902,7 +902,12 @@ impl Req {
         } else {
             None
         };
-        let py_req = requires.unwrap_or_else(|| py_ver.unwrap());
+        let py_req = requires.unwrap_or_else(|| {
+            py_ver.unwrap_or_else(|_| {
+                let wheel_parts: Vec<&str> = release.filename.split("-").collect();
+                Constraint::from_wh_py_vers(wheel_parts[wheel_parts.len() - 3]).unwrap()
+            })
+        });
 
         Self {
             name,
