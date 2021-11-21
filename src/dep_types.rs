@@ -921,24 +921,6 @@ impl Req {
         }
     }
 
-    /// Clone the Req but set a python requirement if python_version.is_none()
-    pub fn clone_or_default_py(&self, python_version: &Version) -> Self {
-        Self {
-            name: self.name.clone(),
-            constraints: self.constraints.clone(),
-            extra: self.extra.clone(),
-            sys_platform: self.sys_platform,
-            python_version: if let Some(ref pv) = self.python_version {
-                Some(pv.clone())
-            } else {
-                Some(vec![Constraint::new(ReqType::Gte, python_version.clone())])
-            },
-            install_with_extras: self.install_with_extras.clone(),
-            path: self.path.clone(),
-            git: self.path.clone(),
-        }
-    }
-
     /// eg `saturn = "^0.3.1"` or `matplotlib = "3.1.1"`
     pub fn to_cfg_string(&self) -> String {
         match self.constraints.len() {
