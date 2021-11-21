@@ -216,10 +216,10 @@ pub fn parse_version(input: &str) -> IResult<&str, Version> {
         opt(preceded(tag("."), parse_digit_or_wildcard)),
         opt(preceded(tag("."), parse_digit_or_wildcard)),
     ))(input)?;
-    let (remain, modifire) = parse_modifier(remain)?;
+    let (remain, modifier) = parse_modifier(remain)?;
     let mut version = Version::new_opt(Some(major), minor, patch);
     version.extra_num = extra_num;
-    version.modifier = modifire;
+    version.modifier = modifier;
     // check if u32::MAX in any version. (marker for `*`). then set that field
     // and any subsequent fields to `None`
     version.star = vec![Some(major), minor, patch, extra_num].contains(&Some(u32::MAX));
